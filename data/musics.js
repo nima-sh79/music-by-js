@@ -15,13 +15,13 @@ export default function musics() {
     {
       id: 2,
       details: "detals of musice folan ",
-      name: "gholame chashm",
-      artist: "MohammadReza Shajaryan",
-      cover: "http://ahangbaz.in/wp-content/uploads/cover/1236866390.jpg",
+      name: "In Akharin Bare",
+      artist: "Ebi",
+      cover: "https://i1.sndcdn.com/artworks-000063466914-ub4urw-t500x500.jpg",
       ccolor: ["#844C6B", "37407E"],
       active: false,
       audio:
-        "https://dl.musiceman.net/Music/2021/03/01/Daniyal.Rasooly.-.Shajarian.Remix.mp3",
+        "https://dl.taakmusic.com/1400/06/27/ebi-akharin%20bar-%5BTaakMusic.Com%5D.mp3",
     },
     {
       id: 3,
@@ -38,13 +38,13 @@ export default function musics() {
     {
       id: 4,
       details: "detals of musice folan ",
-      name: "koli",
-      artist: "Homayoun Shajarian",
-      cover: "http://ahangbaz.in/wp-content/uploads/cover/38357467.jpg",
+      name: "Khone Arezo",
+      artist: "Moein",
+      cover: "https://faazmusic.com/wp-content/uploads/2018/12/Moein-Khoneye-Arezoo.jpg",
       ccolor: ["#844C6B", "37407E"],
       active: false,
       audio:
-        "https://dl.nicmusic.net/nicmusic/004/067/Homayon%20Shajarian%20-%20Koli.mp3",
+        "http://irdl.faazmusic.com/server/1397/9azar/16/Moein%20-%20Khooneye%20Arezoo%20[320].mp3",
     },
     {
       id: 5,

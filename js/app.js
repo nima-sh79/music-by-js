@@ -11,7 +11,17 @@ const playIcon = document.querySelector("#play-icon");
 const coverPlayButton = document.querySelector(".cover-play-button");
 const currentTime = document.querySelector(".current-time");
 const fullTime = document.querySelector(".full-time");
+const musicRange = document.getElementById("music-range");
+const musicProgressBar = document.querySelector(".music-progress-bar");
+const prevButton = document.querySelector(".prev");
+const nextButton = document.querySelector(".next");
+const shuffleMusic = document.getElementById("shuffle-music");
+const repeatMusic = document.getElementById("repeat-music");
+const volumeInput = document.getElementById("volume");
 
+
+let indexOfCurrentMusic = 0;
+let repeatMusicState = false;
 
 
 playIcon.addEventListener ("click", () => {
@@ -20,37 +30,153 @@ playIcon.addEventListener ("click", () => {
 
 
 
-function setCurrentMusic () {
-  [...songsContainer.children].forEach((songElement) => {
-    songElement.addEventListener ("click" , () => {
-      const currentMusic = musics().filter( (shit) => shit.id === parseInt(songElement.dataset.id))[0];
+function updateCurrentMusicUI (currentMusic) {
       currentMusicCover.style.backgroundImage = `url(${currentMusic.cover})`;
       currentMusicTitle.innerHTML = currentMusic.name
       currentMusicSinger.innerHTML = currentMusic.artist
       audio.src = currentMusic.audio
       audio.play().then(() => {
         setInterval(() => {
-          const min = ("0" + Math.floor(audio.currentTime / 60)).slice(-2);
+        const musicProgressBarWidth = (audio.currentTime/audio.duration)* 100;
+        musicProgressBar.style.width = musicProgressBarWidth + "%";
+        const min = ("0" + Math.floor(audio.currentTime / 60)).slice(-2);
         const sec = ("0" + Math.floor(audio.currentTime % 60)).slice(-2);
         currentTime.innerHTML = `${min} : ${sec}`;
         }, 1000);
+        musicRange.max = audio.duration;
         const min = ("0" + Math.floor(audio.duration / 60)).slice(-2);
         const sec = ("0" + Math.floor(audio.duration % 60)).slice(-2);
         fullTime.innerHTML = `${min} : ${sec}`;
         const span = document.createElement ("span");
-        span.innerHTML = "pause";
+        span.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="7rem" height="7rem" fill="white" class="bi bi-pause-btn-fill" viewBox="0 0 16 16">
+        <path d="M0 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm6.25-7C5.56 5 5 5.56 5 6.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C7.5 5.56 6.94 5 6.25 5zm3.5 0c-.69 0-1.25.56-1.25 1.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C11 5.56 10.44 5 9.75 5z"/>
+      </svg>`;
         coverPlayButton.innerHTML = "";
         coverPlayButton.appendChild(span);
         span.style.display = "inline";
         span.onclick = () => {
           if (span.style.display !== "inline") {
             audio.play();
-            span.innerHTML = "pause";
+            span.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="7rem" height="7rem" fill="white" class="bi bi-pause-btn-fill" viewBox="0 0 16 16">
+            <path d="M0 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm6.25-7C5.56 5 5 5.56 5 6.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C7.5 5.56 6.94 5 6.25 5zm3.5 0c-.69 0-1.25.56-1.25 1.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C11 5.56 10.44 5 9.75 5z"/>
+          </svg>`;
             span.style.display = "inline";
           }else {
             audio.pause();
             span.style.display = "inline-block";
-            span.innerHTML = "play";
+            span.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="7rem" height="7rem" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+          </svg>`;
+          }
+        };
+      }); 
+
+
+};
+
+
+shuffleMusic.addEventListener ("click", () => {
+  const randomMusic = Math.floor(Math.random() * musics().length);
+  updateCurrentMusicUI(musics()[randomMusic]);
+});
+
+repeatMusic.onclick = function () {
+   repeatMusicState = !repeatMusicState;
+   if (repeatMusicState === true) repeatMusic.style.backgroundColor = "green";
+   else repeatMusic.style.backgroundColor = "transparent"
+};
+
+
+volumeInput.onchange = function () {
+  audio.volume = volumeInput.value/10;
+};
+
+
+
+musicRange.addEventListener ("change" , (g) => {
+  audio.currentTime = g.target.value;
+  const musicProgressBarWidth = (audio.currentTime/audio.duration)* 100;
+  musicProgressBar.style.width = musicProgressBarWidth + "%";
+});
+
+
+
+
+prevButton.addEventListener ("click", () => {
+  if (indexOfCurrentMusic === 0) {
+    indexOfCurrentMusic = musics().length - 1;
+    updateCurrentMusicUI(musics()[indexOfCurrentMusic]);
+  }else {
+    indexOfCurrentMusic--;
+  updateCurrentMusicUI(musics()[indexOfCurrentMusic]);
+  };
+});
+
+
+audio.onended = handleNextMusic;
+
+
+function handleNextMusic () {
+  if (repeatMusicState === true) return updateCurrentMusicUI(musics()[indexOfCurrentMusic]);
+  if (indexOfCurrentMusic === musics().length - 1) {
+    indexOfCurrentMusic = 0;
+    updateCurrentMusicUI(musics()[indexOfCurrentMusic]);
+  }else {
+    indexOfCurrentMusic++;
+  updateCurrentMusicUI(musics()[indexOfCurrentMusic]);
+  };
+}
+
+
+nextButton.addEventListener ("click", handleNextMusic);
+
+
+
+function setCurrentMusic () {
+  [...songsContainer.children].forEach((songElement) => {
+    songElement.addEventListener ("click" , () => {
+      indexOfCurrentMusic = musics().findIndex(
+        (item) =>   item.id === parseInt(songElement.dataset.id)
+      );
+      console.log(indexOfCurrentMusic);
+      const currentMusic = musics().filter( (shit) => shit.id === parseInt(songElement.dataset.id))[0];
+      currentMusicCover.setAttribute("data-id" , currentMusic.id);
+      currentMusicCover.style.backgroundImage = `url(${currentMusic.cover})`;
+      currentMusicTitle.innerHTML = currentMusic.name
+      currentMusicSinger.innerHTML = currentMusic.artist
+      audio.src = currentMusic.audio
+      audio.play().then(() => {
+        setInterval(() => {
+        const musicProgressBarWidth = (audio.currentTime/audio.duration)* 100;
+        musicProgressBar.style.width = musicProgressBarWidth + "%";
+        const min = ("0" + Math.floor(audio.currentTime / 60)).slice(-2);
+        const sec = ("0" + Math.floor(audio.currentTime % 60)).slice(-2);
+        currentTime.innerHTML = `${min} : ${sec}`;
+        }, 1000);
+        musicRange.max = audio.duration;
+        const min = ("0" + Math.floor(audio.duration / 60)).slice(-2);
+        const sec = ("0" + Math.floor(audio.duration % 60)).slice(-2);
+        fullTime.innerHTML = `${min} : ${sec}`;
+        const span = document.createElement ("span");
+        span.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="7rem" height="7rem" fill="white" class="bi bi-pause-btn-fill" viewBox="0 0 16 16">
+        <path d="M0 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm6.25-7C5.56 5 5 5.56 5 6.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C7.5 5.56 6.94 5 6.25 5zm3.5 0c-.69 0-1.25.56-1.25 1.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C11 5.56 10.44 5 9.75 5z"/>
+      </svg>`;
+        coverPlayButton.innerHTML = "";
+        coverPlayButton.appendChild(span);
+        span.style.display = "inline";
+        span.onclick = () => {
+          if (span.style.display !== "inline") {
+            audio.play();
+            span.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="7rem" height="7rem" fill="white" class="bi bi-pause-btn-fill" viewBox="0 0 16 16">
+            <path d="M0 12V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm6.25-7C5.56 5 5 5.56 5 6.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C7.5 5.56 6.94 5 6.25 5zm3.5 0c-.69 0-1.25.56-1.25 1.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C11 5.56 10.44 5 9.75 5z"/>
+          </svg>`;
+            span.style.display = "inline";
+          }else {
+            audio.pause();
+            span.style.display = "inline-block";
+            span.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="7rem" height="7rem" fill="white" class="bi bi-play-circle-fill" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/>
+          </svg>`;
           }
         };
       });
